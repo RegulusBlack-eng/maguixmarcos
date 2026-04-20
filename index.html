@@ -1,0 +1,259 @@
+Aquí tenés el código completo e integrado. He unificado el diseño "Glassmorphism", la estructura de tarjetas y el script para que la IA funcione apenas le pongas tu clave.
+
+Recordá que para que la IA responda, necesitás generar tu API Key en Google AI Studio y pegarla donde dice TU_API_KEY_AQUÍ.
+
+HTML
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Personal | Asistente IA</title>
+    <style>
+        :root {
+            --bg-color: #050b18;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --accent-color: #38bdf8;
+            --text-color: #e2e8f0;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1e293b, #050b18);
+            color: var(--text-color);
+            font-family: 'Inter', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Estilo para Tareas */
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--accent-color);
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Estilo para Accesos Rápidos */
+        .quick-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .quick-links a {
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .quick-links a:hover {
+            background: var(--accent-color);
+            color: #000;
+            transform: translateY(-3px);
+        }
+
+        /* Estilo para la IA */
+        #chat-window {
+            height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        #ia-input {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            color: white;
+            outline: none;
+        }
+
+        #ia-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .btn-ia {
+            background: var(--accent-color);
+            border: none;
+            border-radius: 10px;
+            padding: 0 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-ia:hover {
+            opacity: 0.8;
+        }
+
+        /* Notas */
+        textarea {
+            width: 100%;
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            resize: none;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>DASHBOARD PERSONAL</h1>
+</header>
+
+<div class="dashboard">
+    <div class="card">
+        <h2>📌 Pendientes</h2>
+        <div class="todo-item"><input type="checkbox"> Repasar temas de la facultad</div>
+        <div class="todo-item"><input type="checkbox"> Avanzar en proyectos web</div>
+        <div class="todo-item"><input type="checkbox"> Organizar herramientas de taller</div>
+        <div class="todo-item"><input type="checkbox"> Revisar backups de trabajos</div>
+    </div>
+
+    <div class="card" style="grid-row: span 2;">
+        <h2>✨ Asistente IA</h2>
+        <div id="chat-window">
+            <p style="color: #888;">Preguntame sobre programación, hardware o lo que necesites...</p>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" id="ia-input" placeholder="Escribí acá...">
+            <button class="btn-ia" onclick="consultarIA()">Enviar</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🚀 Accesos Rápidos</h2>
+        <div class="quick-links">
+            <a href="https://github.com" target="_blank">GitHub</a>
+            <a href="#" target="_blank">Campus</a>
+            <a href="https://bolt.new" target="_blank">Bolt.new</a>
+            <a href="https://lovable.dev" target="_blank">Lovable</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📝 Notas Rápidas</h2>
+        <textarea placeholder="Escribí ideas, códigos o recordatorios aquí..."></textarea>
+    </div>
+</div>
+
+<script type="module">
+    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+
+    // --- REEMPLAZÁ ESTO CON TU API KEY ---
+    const API_KEY = "TU_API_KEY_AQUÍ"; 
+    const genAI = new GoogleGenerativeAI(API_KEY);
+
+    async function consultarIA() {
+        const input = document.getElementById('ia-input');
+        const chatWindow = document.getElementById('chat-window');
+        const userText = input.value;
+
+        if (!userText.trim()) return;
+
+        // Limpiar bienvenida y agregar mensaje del usuario
+        if(chatWindow.innerHTML.includes("Preguntame sobre")) chatWindow.innerHTML = "";
+        chatWindow.innerHTML += `<div style="margin-bottom:10px;"><b>Tú:</b> ${userText}</div>`;
+        input.value = '';
+
+        try {
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const result = await model.generateContent(userText);
+            const response = await result.response;
+            const text = response.text();
+
+            chatWindow.innerHTML += `<div style="margin-bottom:15px; color: var(--accent-color);"><b>IA:</b> ${text}</div>`;
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        } catch (error) {
+            chatWindow.innerHTML += `<div style="color: #ff4444;">Error: Verifica tu API Key.</div>`;
+            console.error(error);
+        }
+    }
+
+    window.consultarIA = consultarIA;
+
+    // Permitir enviar con la tecla Enter
+    document.getElementById('ia-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') consultarIA();
+    });
+</script>
+
+</body>
+</html>
